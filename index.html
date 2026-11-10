@@ -147,6 +147,13 @@
     position: relative; overflow: hidden;
   }
   .gift .pic::after { content: ""; position: absolute; inset: 0; background: radial-gradient(60% 50% at 30% 20%, rgba(255,255,255,.35), transparent 70%); }
+  .divider { display: flex; align-items: center; gap: 10px; margin: 22px 2px 14px; color: var(--gold); font-weight: 800; font-size: 14px; }
+  .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  .divider.note { display: block; color: var(--muted); font-weight: 600; line-height: 1.45; padding: 14px 16px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); margin-top: 4px; }
+  .divider.note::after { display: none; }
+  .gift .pic.photo { background: #fff !important; }
+  .gift .pic.photo::after { display: none; }
+  .gift .pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .gift .body { flex: 1; min-width: 0; }
   .gift h3 { font-family: "Manrope", sans-serif; font-size: 16.5px; font-weight: 800; margin: 2px 32px 6px 0; line-height: 1.25; }
   .gift p { margin: 0 0 12px; color: var(--muted); font-size: 14px; line-height: 1.45; }
@@ -311,7 +318,7 @@
     <div class="stats">
       <div class="stat"><b id="days">—</b><span id="days-label">дней до<br>Нового года</span></div>
       <div class="stat"><b id="ideas">—</b><span>идей<br>подарков</span></div>
-      <div class="stat"><b>3</b><span>вопроса<br>до подарка</span></div>
+      <div class="stat"><b>1</b><span>минута<br>до подарка</span></div>
     </div>
 
     <div class="scene" aria-hidden="true">
@@ -360,32 +367,40 @@
 
     <div class="hero">
       <div class="eyebrow">✦ Подарок, который точно понравится</div>
-      <h1>Найдём идеальный подарок <em>за 3 шага</em></h1>
-      <p>Расскажите, кому выбираете подарок, чем человек увлекается и какой у вас бюджет. Мы предложим идеи и покажем, где их купить.</p>
+      <h1>Найдём идеальный подарок <em>за минуту</em></h1>
+      <p>Расскажите, кому выбираете подарок, сколько человеку лет, чем он увлекается и какой у вас бюджет. Мы предложим идеи и покажем, где их купить.</p>
       <button class="btn" data-go="step1">🎄 Подобрать подарок</button>
     </div>
   </section>
 
   <!-- ШАГ 1 -->
   <section class="screen step" id="s-step1">
-    <div class="progress"><i class="on"></i><i></i><i></i></div>
-    <div class="step-head"><button class="back" data-go="home" aria-label="Назад">←</button><span class="step-count">Шаг 1 из 3</span></div>
+    <div class="progress"></div>
+    <div class="step-head"><button class="back" data-back aria-label="Назад">←</button><span class="step-count"></span></div>
     <h2>Кому выбираем подарок?</h2>
     <div class="grid" id="recipients"></div>
   </section>
 
+  <!-- ШАГ: ВОЗРАСТ -->
+  <section class="screen step" id="s-age">
+    <div class="progress"></div>
+    <div class="step-head"><button class="back" data-back aria-label="Назад">←</button><span class="step-count"></span></div>
+    <h2>Сколько лет этому человеку?</h2>
+    <div class="grid budget" id="ages"></div>
+  </section>
+
   <!-- ШАГ 2 -->
   <section class="screen step" id="s-step2">
-    <div class="progress"><i class="on"></i><i class="on"></i><i></i></div>
-    <div class="step-head"><button class="back" data-go="step1" aria-label="Назад">←</button><span class="step-count">Шаг 2 из 3</span></div>
+    <div class="progress"></div>
+    <div class="step-head"><button class="back" data-back aria-label="Назад">←</button><span class="step-count"></span></div>
     <h2>Чем увлекается этот человек?</h2>
     <div class="grid" id="interests"></div>
   </section>
 
   <!-- ШАГ 3 -->
   <section class="screen step" id="s-step3">
-    <div class="progress"><i class="on"></i><i class="on"></i><i class="on"></i></div>
-    <div class="step-head"><button class="back" data-go="step2" aria-label="Назад">←</button><span class="step-count">Шаг 3 из 3</span></div>
+    <div class="progress"></div>
+    <div class="step-head"><button class="back" data-back aria-label="Назад">←</button><span class="step-count"></span></div>
     <h2>Какой бюджет на подарок?</h2>
     <div class="grid budget" id="budgets"></div>
   </section>
@@ -517,6 +532,14 @@ const APP_LINK = "https://t.me/moy_podarochek_bot/app";
     ["спорт", "Спорт", "🏃"], ["красота", "Красота и уход", "💅"], ["техника", "Техника", "📱"], ["игры", "Игры", "🎲"],
     ["творчество", "Творчество", "🎨"], ["книги", "Книги и учёба", "📚"], ["путешествия", "Путешествия", "✈️"],
   ];
+  const AGES = [
+    ["0-3", "До 3 лет", "малыш", "👶"], ["4-7", "4–7 лет", "дошкольник", "🧒"], ["8-12", "8–12 лет", "школьник", "🎒"],
+    ["13-17", "13–17 лет", "подросток", "🎧"], ["18-30", "18–30 лет", "молодость", "✨"], ["31-55", "31–55 лет", "взрослый", "🌿"],
+    ["55+", "Старше 55", "старшее поколение", "🌸"],
+  ];
+  // Какие возрасты предлагать каждому получателю (если вариант один — шаг пропускается)
+  const AGES_FOR = { "ребёнок": ["0-3", "4-7", "8-12"], "подросток": ["13-17"], "бабушка": ["55+"], "дедушка": ["55+"] };
+  const agesFor = (r) => AGES_FOR[r] || ["18-30", "31-55", "55+"];
   const BUDGETS = [
     ["1", "до 1 000 ₽", "Милые мелочи", "●"], ["2", "1 000 – 3 000 ₽", "Самый популярный", "●●"],
     ["3", "3 000 – 7 000 ₽", "Запоминающийся подарок", "●●●"], ["4", "от 7 000 ₽", "Для самых близких", "●●●●"],
@@ -534,7 +557,7 @@ const APP_LINK = "https://t.me/moy_podarochek_bot/app";
 
   let GIFTS = [];
   const PAGE = 4;
-  const state = { recipient: null, interest: null, budget: null, page: 0, found: [] };
+  const state = { recipient: null, age: null, interest: null, budget: null, page: 0, found: [], mainCount: 0 };
 
   // ——— Хранилище: облако Телеграма (видно на всех устройствах), иначе память браузера ———
   // Формат: { n: имя, w: [id подарков], c: [{ t: название, i: [id] }] }
@@ -578,8 +601,10 @@ const APP_LINK = "https://t.me/moy_podarochek_bot/app";
       if (rec.includes("все")) rec = [...new Set(rec.filter(r => r !== "все").concat(ADULTS))];
       const ints = split(c[idx("интересы")]);
       const link = (c[idx("ссылка")] || "").trim() || "https://www.ozon.ru/search/?text=" + encodeURIComponent(name);
-      out.push({ id, name, desc: (c[idx("описание")] || "").trim(), recipients: rec, interests: ints.length ? ints : ["любые"],
-                 budget: (c[idx("бюджет")] || "").trim(), link, hidden: !name });
+      let img = idx("картинка") >= 0 ? (c[idx("картинка")] || "").trim() : "";
+      if (img && !/^https?:\/\//i.test(img)) img = "img/" + img;   // просто имя файла → берём из папки img
+      out.push({ id, name, desc: (c[idx("описание")] || "").trim(), recipients: rec, ages: idx("возраст") >= 0 ? split(c[idx("возраст")]) : [], interests: ints.length ? ints : ["любые"],
+                 budget: (c[idx("бюджет")] || "").trim(), link, img, hidden: !name });
     });
     return out;
   }
@@ -591,24 +616,26 @@ const APP_LINK = "https://t.me/moy_podarochek_bot/app";
     for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; }
     return arr;
   }
-  function pick(recipient, interest, budget) {
-    const scored = [];
+  // Возвращает { main: подарки точно из категории, extra: универсальные подарки }
+  function pick(recipient, age, interest, budget) {
+    const main = [], extra = [];
     for (const g of GIFTS) {
       if (g.hidden) continue;
       const fits = recipient === "себе" ? g.recipients.some(r => ADULTS.includes(r)) : g.recipients.includes(recipient);
       if (!fits) continue;
+      if (g.ages.length && !g.ages.includes(age)) continue;
       let score;
       if (g.budget === budget) score = 10;
-      else if (Math.abs(+g.budget - +budget) === 1) score = 3;
+      else if (Math.abs(+g.budget - +budget) === 1) score = 3;     // соседний бюджет
+      else if (+g.budget < +budget) score = 1;                    // заметно дешевле — в самом конце
       else continue;
-      if (interest !== "любые" && g.interests.includes(interest)) score += 6;
-      else if (g.interests.includes("любые")) score += 2;
-      else if (interest === "любые") score += 1;
-      scored.push([score, g]);
+      if (interest === "любые") main.push([score + (g.interests.includes("любые") ? 2 : 0), g]);
+      else if (g.interests.includes(interest)) main.push([score, g]);
+      else if (g.interests.includes("любые")) extra.push([score, g]);
     }
-    shuffle(scored, (tgUser && tgUser.id) || 7);
-    scored.sort((a, b) => b[0] - a[0]);
-    return scored.map(x => x[1]);
+    const seed = (tgUser && tgUser.id) || 7;
+    const order = (arr) => shuffle(arr, seed).sort((x, y) => y[0] - x[0]).map(x => x[1]);
+    return { main: order(main), extra: order(extra) };
   }
 
   // ——— Ссылка на вишлист: имя и номера подарков упакованы в параметр ссылки ———
@@ -640,21 +667,35 @@ const APP_LINK = "https://t.me/moy_podarochek_bot/app";
   }
 
   // ——— Навигация ———
-  const TAB_OF = { home: "home", step1: "home", step2: "home", step3: "home", results: "home", colls: "colls", coll: "colls", wish: "wish", shared: "wish", tips: "tips" };
-  const BACK = { step1: "home", step2: "step1", step3: "step2", results: "step3", colls: "home", coll: "colls", wish: "home", shared: "home", tips: "home" };
+  const TAB_OF = { home: "home", step1: "home", age: "home", step2: "home", step3: "home", results: "home", colls: "colls", coll: "colls", wish: "wish", shared: "wish", tips: "tips" };
+  const BACK = { step1: "home", results: "step3", colls: "home", coll: "colls", wish: "home", shared: "home", tips: "home" };
   let current = "home";
   function go(name) {
     document.querySelectorAll(".screen").forEach(s => s.classList.remove("on"));
     $("s-" + name).classList.add("on");
     document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", t.dataset.tab === TAB_OF[name]));
     current = name;
+    if (STEP_NAMES.includes(name)) renderProgress(name);
     if (name === "colls") renderColls();
     if (name === "wish") renderWish();
     window.scrollTo({ top: 0 });
     if (inTg) { try { name === "home" ? tg.BackButton.hide() : tg.BackButton.show(); } catch (e) {} }
   }
-  if (inTg) { try { tg.BackButton.onClick(() => sheetOpen ? closeSheet() : go(BACK[current] || "home")); } catch (e) {} }
+  // Шаги подбора: шаг с возрастом есть, только если для получателя больше одного варианта
+  const STEP_NAMES = ["step1", "age", "step2", "step3"];
+  const steps = () => (state.recipient && agesFor(state.recipient).length === 1) ? ["step1", "step2", "step3"] : STEP_NAMES;
+  function prevOf(name) {
+    const list = steps(), k = list.indexOf(name);
+    return k > 0 ? list[k - 1] : (BACK[name] || "home");
+  }
+  function renderProgress(name) {
+    const list = steps(), k = Math.max(0, list.indexOf(name)), sec = $("s-" + name);
+    sec.querySelector(".progress").innerHTML = list.map((_, j) => `<i class="${j <= k ? "on" : ""}"></i>`).join("");
+    sec.querySelector(".step-count").textContent = `Шаг ${k + 1} из ${list.length}`;
+  }
+  if (inTg) { try { tg.BackButton.onClick(() => sheetOpen ? closeSheet() : go(prevOf(current))); } catch (e) {} }
   document.addEventListener("click", (e) => {
+    const bk = e.target.closest("[data-back]"); if (bk) { haptic(); go(prevOf(current)); return; }
     const b = e.target.closest("[data-go]"); if (b) { haptic(); go(b.dataset.go); return; }
     const t = e.target.closest("[data-tab]"); if (t) { haptic(); go(t.dataset.tab); }
   });
@@ -670,7 +711,21 @@ const APP_LINK = "https://t.me/moy_podarochek_bot/app";
       el.appendChild(b);
     });
   }
-  chips($("recipients"), RECIPIENTS, "recipient", () => go("step2"));
+  function afterRecipient() {
+    const opts = agesFor(state.recipient);
+    if (opts.length === 1) { state.age = opts[0]; go("step2"); return; }
+    if (!opts.includes(state.age)) state.age = null;
+    const el = $("ages"); el.innerHTML = "";
+    AGES.filter(x => opts.includes(x[0])).forEach(([k, text, sub, em]) => {
+      const b = document.createElement("button");
+      b.className = "chip" + (state.age === k ? " sel" : "");
+      b.innerHTML = `<span style="display:flex;align-items:center;gap:12px"><span class="em">${em}</span><span>${text}<small>${sub}</small></span></span>`;
+      b.onclick = () => { haptic(); state.age = k; el.querySelectorAll(".chip").forEach(c => c.classList.remove("sel")); b.classList.add("sel"); setTimeout(() => go("step2"), 160); };
+      el.appendChild(b);
+    });
+    go("age");
+  }
+  chips($("recipients"), RECIPIENTS, "recipient", afterRecipient);
   chips($("interests"), INTERESTS, "interest", () => go("step3"));
   BUDGETS.forEach(([k, text, sub, coins]) => {
     const b = document.createElement("button");
@@ -698,6 +753,12 @@ const APP_LINK = "https://t.me/moy_podarochek_bot/app";
       </div>`;
     el.querySelector("h3").textContent = g.name;
     el.querySelector("p").textContent = g.desc;
+    if (g.img) {
+      const pic = el.querySelector(".pic"), im = new Image();
+      im.alt = ""; im.referrerPolicy = "no-referrer";
+      im.onload = () => { pic.textContent = ""; pic.classList.add("photo"); pic.appendChild(im); };
+      im.src = g.img;   // если картинка не загрузится, останется значок
+    }
     el.querySelector("a.go").onclick = (e) => { if (inTg) { e.preventDefault(); try { tg.openLink(g.link); } catch (err) { window.open(g.link, "_blank"); } } };
     if (opts.onRemove) {
       const r = document.createElement("button");
@@ -716,10 +777,13 @@ const APP_LINK = "https://t.me/moy_podarochek_bot/app";
 
   // ——— Результаты ———
   function showResults() {
-    state.found = pick(state.recipient, state.interest, state.budget);
+    const res = pick(state.recipient, state.age, state.interest, state.budget);
+    state.found = res.main.concat(res.extra);
+    state.mainCount = res.main.length;
     state.page = 0;
     $("summary").innerHTML =
       `<span class="pill">${emoji(RECIPIENTS, state.recipient)} ${label(RECIPIENTS, state.recipient)}</span>` +
+      `<span class="pill">${(AGES.find(x => x[0] === state.age) || [])[3] || "🎂"} ${label(AGES, state.age)}</span>` +
       `<span class="pill">${emoji(INTERESTS, state.interest)} ${label(INTERESTS, state.interest)}</span>` +
       `<span class="pill">💰 ${label(BUDGETS, state.budget)}</span>`;
     $("results").innerHTML = "";
@@ -727,9 +791,18 @@ const APP_LINK = "https://t.me/moy_podarochek_bot/app";
     go("results");
   }
   function renderPage() {
-    const chunk = state.found.slice(state.page * PAGE, (state.page + 1) * PAGE);
+    const start = state.page * PAGE;
+    const chunk = state.found.slice(start, start + PAGE);
     if (!chunk.length && state.page === 0) $("results").innerHTML = `<div class="empty"><div class="big">🙈</div>Для такого сочетания идей пока нет.<br>Попробуйте другой бюджет.</div>`;
-    chunk.forEach((g, i) => $("results").appendChild(giftCard(g, i)));
+    chunk.forEach((g, i) => {
+      if (start + i === state.mainCount && state.mainCount < state.found.length) {
+        const d = document.createElement("div");
+        if (state.mainCount) { d.className = "divider"; d.textContent = "✨ Универсальные идеи"; }
+        else { d.className = "divider note"; d.textContent = "В категории «" + label(INTERESTS, state.interest) + "» для этого человека идей пока нет. Вот подарки, которые подойдут почти всем ✨"; }
+        $("results").appendChild(d);
+      }
+      $("results").appendChild(giftCard(g, i));
+    });
     $("more").style.display = state.found.length > (state.page + 1) * PAGE ? "" : "none";
   }
   $("more").onclick = () => { haptic(); state.page++; renderPage(); };
@@ -838,7 +911,7 @@ const APP_LINK = "https://t.me/moy_podarochek_bot/app";
     $("share-wish").style.display = items.length ? "" : "none";
   }
   $("my-name").addEventListener("change", (e) => { data.n = e.target.value.trim().slice(0, 20); saveData(); });
-  $("wish-add").onclick = () => { haptic(); state.recipient = "себе"; go("step2"); };
+  $("wish-add").onclick = () => { haptic(); state.recipient = "себе"; afterRecipient(); };
   $("share-wish").onclick = () => {
     haptic("medium");
     data.n = $("my-name").value.trim().slice(0, 20); saveData();

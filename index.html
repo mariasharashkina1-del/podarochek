@@ -2,6 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
+<meta name="takprodam-verification" content="25e14b3d-e28b-4265-8c77-11fb23182adf">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>Подарочек</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -616,26 +617,28 @@ const APP_LINK = "https://t.me/moy_podarochek_bot/app";
     for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; }
     return arr;
   }
-  // Возвращает { main: подарки точно из категории, extra: универсальные подарки }
+  // Возвращает { main: точно из категории и бюджета, extra: ещё идеи этому человеку (сначала универсальные) }
   function pick(recipient, age, interest, budget) {
-    const main = [], extra = [];
+    const groups = [[], [], [], []];   // 0 — категория, 1 — универсальные, 2 — другие, 3 — дороже бюджета
     for (const g of GIFTS) {
       if (g.hidden) continue;
       const fits = recipient === "себе" ? g.recipients.some(r => ADULTS.includes(r)) : g.recipients.includes(recipient);
       if (!fits) continue;
       if (g.ages.length && !g.ages.includes(age)) continue;
-      let score;
-      if (g.budget === budget) score = 10;
-      else if (Math.abs(+g.budget - +budget) === 1) score = 3;     // соседний бюджет
-      else if (+g.budget < +budget) score = 1;                    // заметно дешевле — в самом конце
-      else continue;
-      if (interest === "любые") main.push([score + (g.interests.includes("любые") ? 2 : 0), g]);
-      else if (g.interests.includes(interest)) main.push([score, g]);
-      else if (g.interests.includes("любые")) extra.push([score, g]);
+      const diff = +g.budget - +budget;
+      if (isNaN(diff)) continue;
+      let score = diff === 0 ? 10 : Math.abs(diff) === 1 ? 4 : diff < 0 ? 2 : 0;
+      if (g.img) score += 1;
+      let cls = (interest === "любые" || g.interests.includes(interest)) ? 0 : g.interests.includes("любые") ? 1 : 2;
+      if (score < 1) cls = 3;
+      groups[cls].push([score, g]);
     }
     const seed = (tgUser && tgUser.id) || 7;
     const order = (arr) => shuffle(arr, seed).sort((x, y) => y[0] - x[0]).map(x => x[1]);
-    return { main: order(main), extra: order(extra) };
+    const [g0, g1, g2, g3] = groups.map(order);
+    let extra = g1.concat(g2);
+    if (g0.length + extra.length < 4) extra = extra.concat(g3);
+    return { main: g0, extra };
   }
 
   // ——— Ссылка на вишлист: имя и номера подарков упакованы в параметр ссылки ———
@@ -797,8 +800,8 @@ const APP_LINK = "https://t.me/moy_podarochek_bot/app";
     chunk.forEach((g, i) => {
       if (start + i === state.mainCount && state.mainCount < state.found.length) {
         const d = document.createElement("div");
-        if (state.mainCount) { d.className = "divider"; d.textContent = "✨ Универсальные идеи"; }
-        else { d.className = "divider note"; d.textContent = "В категории «" + label(INTERESTS, state.interest) + "» для этого человека идей пока нет. Вот подарки, которые подойдут почти всем ✨"; }
+        if (state.mainCount) { d.className = "divider"; d.textContent = "✨ Ещё идеи для этого человека"; }
+        else { d.className = "divider note"; d.textContent = "В категории «" + label(INTERESTS, state.interest) + "» для этого человека пока ничего нет. Вот что ещё может понравиться ✨"; }
         $("results").appendChild(d);
       }
       $("results").appendChild(giftCard(g, i));

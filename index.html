@@ -480,6 +480,7 @@
     <div class="tip"><div class="n">3</div><div><b>Добавьте открытку</b><span>Пара тёплых слов от руки делает даже простой подарок особенным.</span></div></div>
     <div class="tip"><div class="n">4</div><div><b>Красиво упакуйте</b><span>Крафтовая бумага, лента и веточка ели — и подарок выглядит дороже.</span></div></div>
     <button class="btn red" data-go="step1" style="margin-top:8px">🎄 Подобрать подарок</button>
+    <button class="btn" id="open-channel" style="margin-top:10px">📢 Наш канал с идеями</button>
   </section>
 </div>
 
@@ -512,6 +513,7 @@
    а app — на короткое имя, которое вы задали в @BotFather (/newapp).
    ============================================================ */
 const APP_LINK = "https://t.me/moy_podarochek_bot/app";
+const CHANNEL_LINK = "https://t.me/podarochek_idei";
 
 (function () {
   const tg = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData !== undefined ? window.Telegram.WebApp : null;
@@ -669,6 +671,10 @@ const APP_LINK = "https://t.me/moy_podarochek_bot/app";
     if (navigator.share) { navigator.share({ text: text + " " + url }).catch(() => {}); return; }
     window.open(share, "_blank");
   }
+  document.getElementById("open-channel").onclick = () => {
+    if (inTg) { try { tg.openTelegramLink(CHANNEL_LINK); return; } catch (e) {} }
+    window.open(CHANNEL_LINK, "_blank");
+  };
 
   // ——— Навигация ———
   const TAB_OF = { home: "home", step1: "home", age: "home", step2: "home", step3: "home", results: "home", colls: "colls", coll: "colls", wish: "wish", shared: "wish", tips: "tips" };

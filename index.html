@@ -80,6 +80,10 @@
     box-shadow: 0 8px 24px rgba(226, 72, 61, .35), inset 0 1px 0 rgba(255,255,255,.25);
   }
   .brand-title { font-family: "Unbounded", sans-serif; font-weight: 700; font-size: 18px; line-height: 1.1; }
+  body.compact .top { padding: 2px 2px 8px; }
+  body.compact .logo { width: 36px; height: 36px; border-radius: 11px; font-size: 19px; }
+  body.compact .brand-title { font-size: 17px !important; }
+  body.compact .brand-sub, body.compact .top .brand > div > div + div { display: none; }
   .brand-sub { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin-top: 4px; font-weight: 700; }
 
   /* Карточки статистики */
@@ -173,7 +177,7 @@
   .pill { padding: 7px 12px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); font-size: 13px; font-weight: 700; }
   .gift {
     position: relative; display: flex; gap: 14px; padding: 16px; margin-bottom: 12px;
-    border-radius: var(--radius); background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); background: rgba(16, 52, 42, .92); border: 1px solid var(--line);
     animation: rise .45s cubic-bezier(.2, .8, .2, 1) both;
   }
   @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
@@ -186,13 +190,20 @@
   .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
   .divider.note { display: block; color: var(--muted); font-weight: 600; line-height: 1.45; padding: 14px 16px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); margin-top: 4px; }
   .divider.note::after { display: none; }
+  #results .gift.has-img { flex-direction: column; gap: 14px; padding: 12px 12px 16px; }
+  #results .gift.has-img .pic { width: 100%; height: 210px; border-radius: 16px; font-size: 64px; }
+  #results .gift.has-img .pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+  #results .gift.has-img .body { padding: 0 4px; }
+  #results .gift.has-img .heart { top: 20px; right: 20px; background: rgba(13, 42, 34, .55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  #results .gift.has-img a.go { width: 100%; justify-content: center; padding: 13px 14px; font-size: 15px; }
   .gift .pic.photo { background: #fff !important; }
   .gift .pic.photo::after { display: none; }
   .gift .pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .gift .body { flex: 1; min-width: 0; }
-  .gift h3 { font-family: "Manrope", sans-serif; font-size: 16.5px; font-weight: 800; margin: 2px 32px 6px 0; line-height: 1.25; }
+  .gift h3 { font-family: "Manrope", sans-serif; font-size: 16.5px; font-weight: 800; margin: 2px 40px 6px 0; line-height: 1.25; }
+  #results .gift.has-img h3 { margin-right: 0; font-size: 17.5px; }
   .gift p { margin: 0 0 12px; color: var(--muted); font-size: 14px; line-height: 1.45; }
-  .gift .ad { margin: -6px 0 10px; font-size: 10.5px; color: var(--muted); opacity: .7; line-height: 1.3; }
+  .gift .ad { margin: -6px 0 10px; font-size: 11.5px; color: var(--muted); opacity: .8; line-height: 1.35; }
   .gift .promo { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; width: 100%; margin: 0 0 10px; padding: 8px 10px; border-radius: 12px;
     border: 1.5px dashed var(--gold); background: rgba(242,196,109,.08); color: var(--cream, #fbf6ea); font: inherit; font-size: 12.5px; text-align: left; cursor: pointer; }
   .gift .promo span { color: var(--gold); font-weight: 800; }
@@ -204,7 +215,7 @@
     background: var(--red); color: #fff; text-decoration: none; font-weight: 800; font-size: 13.5px;
   }
   .heart {
-    position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; border-radius: 12px; border: 0;
+    position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; border-radius: 14px; border: 0;
     background: rgba(255,255,255,.08); color: var(--text); font-size: 17px; cursor: pointer; display: grid; place-items: center;
     transition: transform .15s ease;
   }
@@ -361,11 +372,10 @@
     <div class="stats">
       <div class="stat"><b id="days">—</b><span id="days-label">дней до<br>Нового года</span></div>
       <div class="stat"><b id="ideas">—</b><span>идей<br>подарков</span></div>
-      <div class="stat"><b>1</b><span>минута<br>до подарка</span></div>
+      <div class="stat"><b>0 ₽</b><span>подбор<br>бесплатно</span></div>
     </div>
 
     <div class="hero">
-      <div class="eyebrow">✦ Подарок, который точно понравится</div>
       <h1>Найдём идеальный подарок <em>за минуту</em></h1>
       <p>Ответьте на 4 вопроса — покажем идеи с ценами и где их купить.</p>
       <button class="btn" data-go="step1">🎄 Подобрать подарок</button>
@@ -469,7 +479,7 @@
     <div class="actions">
       <button class="btn" id="more">🔄 Показать ещё идеи</button>
       <div class="row">
-        <button class="btn ghost" data-go="step1">Другому человеку</button>
+        <button class="btn ghost" data-go="step1">🎁 Другому</button>
         <button class="btn ghost" id="share-app">📤 Поделиться</button>
       </div>
       <a class="sub-card" href="https://t.me/moy_podarochek_bot?start=site_results" target="_blank" rel="noopener" data-sub style="margin-top:2px">
@@ -535,7 +545,7 @@
     <div class="tip"><div class="n">2</div><div><b>Спросите вишлист</b><span>Отправьте друзьям ссылку на свой вишлист и попросите их сделать так же — угадывать не придётся.</span></div></div>
     <div class="tip"><div class="n">3</div><div><b>Добавьте открытку</b><span>Пара тёплых слов от руки делает даже простой подарок особенным.</span></div></div>
     <div class="tip"><div class="n">4</div><div><b>Красиво упакуйте</b><span>Крафтовая бумага, лента и веточка ели — и подарок выглядит дороже.</span></div></div>
-    <button class="btn red" data-go="step1" style="margin-top:8px">🎄 Подобрать подарок</button>
+    <button class="btn" data-go="step1" style="margin-top:8px">🎄 Подобрать подарок</button>
     <button class="btn" id="open-channel" style="margin-top:10px">📢 Наш канал с идеями</button>
   </section>
 </div>
@@ -800,6 +810,7 @@ const CHANNEL_LINK = "https://t.me/podarochek_idei";
     if (name === "colls") renderColls();
     if (name === "wish") renderWish();
     window.scrollTo({ top: 0 });
+    document.body.classList.toggle("compact", ["step1", "gender", "age", "step2", "step3", "results"].includes(name));
     if (inTg) { try { name === "home" ? tg.BackButton.hide() : tg.BackButton.show(); } catch (e) {} }
   }
   // Шаги подбора: шаг с возрастом есть, только если для получателя больше одного варианта
@@ -813,8 +824,10 @@ const CHANNEL_LINK = "https://t.me/podarochek_idei";
   }
   function renderProgress(name) {
     const list = steps(), k = Math.max(0, list.indexOf(name)), sec = $("s-" + name);
-    sec.querySelector(".progress").innerHTML = list.map((_, j) => `<i class="${j <= k ? "on" : ""}"></i>`).join("");
-    sec.querySelector(".step-count").textContent = `Шаг ${k + 1} из ${list.length}`;
+    const known = !!state.recipient;   // до выбора получателя число шагов ещё неизвестно
+    const total = known ? list.length : 4;
+    sec.querySelector(".progress").innerHTML = Array.from({ length: total }, (_, j) => `<i class="${j <= k ? "on" : ""}"></i>`).join("");
+    sec.querySelector(".step-count").textContent = known ? `Шаг ${k + 1} из ${list.length}` : "Шаг 1";
   }
   if (inTg) { try { tg.BackButton.onClick(() => sheetOpen ? closeSheet() : go(prevOf(current))); } catch (e) {} }
   document.addEventListener("click", (e) => {
@@ -886,7 +899,7 @@ const CHANNEL_LINK = "https://t.me/podarochek_idei";
     const main = g.interests.find(x => COLORS[x] && x !== "любые") || "любые";
     const [c1, c2] = COLORS[main];
     const el = document.createElement("article");
-    el.className = "gift";
+    el.className = "gift" + (g.img ? " has-img" : "");
     el.style.animationDelay = (i * 70) + "ms";
     el.innerHTML = `
       <div class="pic" style="background:linear-gradient(145deg, ${c1}, ${c2})">${emoji(INTERESTS, main)}</div>
@@ -920,7 +933,7 @@ const CHANNEL_LINK = "https://t.me/podarochek_idei";
     }
     if (g.img) {
       const pic = el.querySelector(".pic"), im = new Image();
-      im.alt = ""; im.referrerPolicy = "no-referrer";
+      im.alt = g.name; im.referrerPolicy = "no-referrer";
       im.onload = () => { pic.textContent = ""; pic.classList.add("photo"); pic.appendChild(im); };
       im.src = g.img;   // если картинка не загрузится, останется значок
     }

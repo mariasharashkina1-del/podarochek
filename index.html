@@ -13,11 +13,13 @@
   window.IN_TG = /tgWebApp/.test(location.hash) || !!window.TelegramWebviewProxy || (window.parent !== window);
   if (window.IN_TG) document.write('<script src="https://telegram.org/js/telegram-web-app.js"><\/script>');
   // Пиксель VK Рекламы (Top.Mail.Ru): впишите номер пикселя из кабинета VK Рекламы
-  window.VK_PIXEL_ID = "3814633";
-  window.goal = function (name) { try { if (window.VK_PIXEL_ID) (window._tmr = window._tmr || []).push({ type: "reachGoal", id: window.VK_PIXEL_ID, goal: name }); } catch (e) {} };
-  if (window.VK_PIXEL_ID && !window.IN_TG) {
+  // основной пиксель — idealgo.ru (3816480); старый (3814633) оставлен, чтобы не терять статистику
+  window.VK_PIXEL_IDS = ["3816480", "3814633"];
+  window.VK_PIXEL_ID = window.VK_PIXEL_IDS[0];
+  window.goal = function (name) { try { var q = (window._tmr = window._tmr || []); window.VK_PIXEL_IDS.forEach(function (id) { q.push({ type: "reachGoal", id: id, goal: name }); }); } catch (e) {} };
+  if (window.VK_PIXEL_IDS.length && !window.IN_TG) {
     var _tmr = window._tmr || (window._tmr = []);
-    _tmr.push({ id: window.VK_PIXEL_ID, type: "pageView", start: (new Date()).getTime() });
+    window.VK_PIXEL_IDS.forEach(function (id) { _tmr.push({ id: id, type: "pageView", start: (new Date()).getTime() }); });
     (function (d, id) { if (d.getElementById(id)) return; var ts = d.createElement("script"); ts.async = true; ts.id = id;
       ts.src = "https://top-fwz1.mail.ru/js/code.js"; var s = d.getElementsByTagName("script")[0]; s.parentNode.insertBefore(ts, s); })(document, "tmr-code");
   }
@@ -96,9 +98,25 @@
   .hero h1 em { font-style: normal; color: var(--gold); }
   .hero p { color: var(--muted); font-size: 15.5px; line-height: 1.5; margin: 0 0 22px; }
 
+  .hero { margin-top: 20px; }
+  .hero .btn { margin-top: 2px; }
+  /* Подписка на бота */
+  .sub-card {
+    display: flex; align-items: center; gap: 12px; margin-top: 12px; padding: 13px 16px; border-radius: 18px;
+    background: var(--card); border: 1px solid var(--line); color: var(--text); text-decoration: none;
+    min-height: 56px; transition: transform .12s ease;
+  }
+  .sub-card:active { transform: scale(.98); }
+  .sub-card .ic { flex: 0 0 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    background: #2aa1de; font-size: 19px; }
+  .sub-card b { display: block; font-size: 15px; font-weight: 800; }
+  .sub-card small { display: block; font-size: 12.5px; color: var(--muted); margin-top: 2px; line-height: 1.3; }
+  .sub-card .ar { margin-left: auto; color: var(--muted); font-size: 20px; }
+  html.in-tg .sub-card { display: none; }
+
   /* Главная иллюстрация */
   .scene {
-    position: relative; border-radius: 28px; overflow: hidden; height: 230px; margin: 22px 0 22px;
+    position: relative; border-radius: 28px; overflow: hidden; height: 180px; margin: 22px 0 22px;
     background: radial-gradient(90% 90% at 50% 100%, #2b6b52 0%, #163f32 55%, #0f2f26 100%);
     border: 1px solid var(--line);
   }
@@ -307,7 +325,7 @@
 </head>
 <body>
 <div id="partner-verification" style="display:none">74x79zu1vtv0x9ei w5w35j17orkmam7e</div>
-<noscript><div><img src="https://top-fwz1.mail.ru/counter?id=3814633;js=na" style="position:absolute;left:-9999px;" alt="Top.Mail.Ru" /></div></noscript>
+<noscript><div><img src="https://top-fwz1.mail.ru/counter?id=3816480;js=na" style="position:absolute;left:-9999px;" alt="Top.Mail.Ru" /><img src="https://top-fwz1.mail.ru/counter?id=3814633;js=na" style="position:absolute;left:-9999px;" alt="" /></div></noscript>
 <canvas id="snow"></canvas>
 
 <div class="app">
@@ -344,6 +362,16 @@
       <div class="stat"><b id="days">—</b><span id="days-label">дней до<br>Нового года</span></div>
       <div class="stat"><b id="ideas">—</b><span>идей<br>подарков</span></div>
       <div class="stat"><b>1</b><span>минута<br>до подарка</span></div>
+    </div>
+
+    <div class="hero">
+      <div class="eyebrow">✦ Подарок, который точно понравится</div>
+      <h1>Найдём идеальный подарок <em>за минуту</em></h1>
+      <p>Ответьте на 4 вопроса — покажем идеи с ценами и где их купить.</p>
+      <button class="btn" data-go="step1">🎄 Подобрать подарок</button>
+      <a class="sub-card" href="https://t.me/moy_podarochek_bot?start=site_home" target="_blank" rel="noopener" data-sub>
+        <span class="ic">🔔</span><span><b>Новые идеи — в Telegram</b><small>Пришлём, когда добавим подарки</small></span><span class="ar">›</span>
+      </a>
     </div>
 
     <div class="scene" aria-hidden="true">
@@ -390,12 +418,6 @@
       </svg>
     </div>
 
-    <div class="hero">
-      <div class="eyebrow">✦ Подарок, который точно понравится</div>
-      <h1>Найдём идеальный подарок <em>за минуту</em></h1>
-      <p>Расскажите, кому выбираете подарок, сколько человеку лет, чем он увлекается и какой у вас бюджет. Мы предложим идеи и покажем, где их купить.</p>
-      <button class="btn" data-go="step1">🎄 Подобрать подарок</button>
-    </div>
   </section>
 
   <!-- ШАГ 1 -->
@@ -450,6 +472,9 @@
         <button class="btn ghost" data-go="step1">Другому человеку</button>
         <button class="btn ghost" id="share-app">📤 Поделиться</button>
       </div>
+      <a class="sub-card" href="https://t.me/moy_podarochek_bot?start=site_results" target="_blank" rel="noopener" data-sub style="margin-top:2px">
+        <span class="ic">🔔</span><span><b>Не нашли то самое?</b><small>Подпишитесь в Telegram — пришлём новые идеи</small></span><span class="ar">›</span>
+      </a>
     </div>
   </section>
 
@@ -755,6 +780,8 @@ const CHANNEL_LINK = "https://t.me/podarochek_idei";
     if (navigator.share) { navigator.share({ text: text + " " + url }).catch(() => {}); return; }
     window.open(share, "_blank");
   }
+  if (inTg || window.IN_TG) document.documentElement.classList.add("in-tg");
+  document.querySelectorAll("[data-sub]").forEach((a) => a.addEventListener("click", () => { window.goal && window.goal("bot_sub"); }));
   document.getElementById("open-channel").onclick = () => {
     if (inTg) { try { tg.openTelegramLink(CHANNEL_LINK); return; } catch (e) {} }
     window.open(CHANNEL_LINK, "_blank");

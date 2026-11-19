@@ -667,6 +667,8 @@ const CHANNEL_LINK = "https://t.me/podarochek_idei";
     return new Promise((resolve) => {
       const fromLocal = () => { try { return JSON.parse(localStorage.getItem("gifts-data") || "null"); } catch (e) { return null; } };
       if (!hasCloud) return resolve(fromLocal());
+      // в некоторых версиях Telegram облачное хранилище не отвечает — не ждём дольше 1,5 секунды
+      setTimeout(() => resolve(fromLocal()), 1500);
       try {
         tg.CloudStorage.getItem("data", (err, val) => {
           if (err || !val) return resolve(fromLocal());
@@ -824,10 +826,10 @@ const CHANNEL_LINK = "https://t.me/podarochek_idei";
   }
   function renderProgress(name) {
     const list = steps(), k = Math.max(0, list.indexOf(name)), sec = $("s-" + name);
-    const known = !!state.recipient;   // до выбора получателя число шагов ещё неизвестно
-    const total = known ? list.length : 4;
-    sec.querySelector(".progress").innerHTML = Array.from({ length: total }, (_, j) => `<i class="${j <= k ? "on" : ""}"></i>`).join("");
-    sec.querySelector(".step-count").textContent = known ? `Шаг ${k + 1} из ${list.length}` : "Шаг 1";
+    // всегда 4 шага: кому → о человеке (пол/возраст) → увлечения → бюджет; пропущенный шаг просто засчитывается
+    const num = { step1: 1, gender: 2, age: 2, step2: 3, step3: 4 }[name] || (k + 1);
+    sec.querySelector(".progress").innerHTML = [1, 2, 3, 4].map(j => `<i class="${j <= num ? "on" : ""}"></i>`).join("");
+    sec.querySelector(".step-count").textContent = `Шаг ${num} из 4`;
   }
   if (inTg) { try { tg.BackButton.onClick(() => sheetOpen ? closeSheet() : go(prevOf(current))); } catch (e) {} }
   document.addEventListener("click", (e) => {
@@ -1155,10 +1157,14 @@ const CHANNEL_LINK = "https://t.me/podarochek_idei";
   })();
 
   // ——— Старт ———
-  Promise.all([
-    fetch("gifts.csv?v=" + Date.now()).then(r => { if (!r.ok) throw new Error(r.status); return r.text(); }),
-    loadData(),
-  ]).then(([csv]) => {
+  const fetchCsv = (tries) => {
+    const ctl = window.AbortController ? new AbortController() : null;
+    const timer = setTimeout(() => ctl && ctl.abort(), 12000);
+    return fetch("gifts.csv?v=" + Date.now(), ctl ? { signal: ctl.signal, cache: "no-store" } : {})
+      .then(r => { clearTimeout(timer); if (!r.ok) throw new Error(r.status); return r.text(); })
+      .catch(e => { clearTimeout(timer); if (tries > 0) return new Promise(r => setTimeout(r, 800)).then(() => fetchCsv(tries - 1)); throw e; });
+  };
+  Promise.all([fetchCsv(2), loadData().catch(() => {})]).then(([csv]) => {
     GIFTS = parseCSV(csv);
     $("ideas").textContent = GIFTS.filter(g => !g.hidden).length;
     updateCounts();

@@ -2,6 +2,20 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
+<!-- Top.Mail.Ru counter -->
+<script type="text/javascript">
+var _tmr = window._tmr || (window._tmr = []);
+_tmr.push({id: "3816480", type: "pageView", start: (new Date()).getTime()});
+(function (d, w, id) {
+  if (d.getElementById(id)) return;
+  var ts = d.createElement("script"); ts.type = "text/javascript"; ts.async = true; ts.id = id;
+  ts.src = "https://top-fwz1.mail.ru/js/code.js";
+  var f = function () {var s = d.getElementsByTagName("script")[0]; s.parentNode.insertBefore(ts, s);};
+  if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); }
+})(document, window, "tmr-code");
+</script>
+<noscript><div><img src="https://top-fwz1.mail.ru/counter?id=3816480;js=na" style="position:absolute;left:-9999px;" alt="Top.Mail.Ru" /></div></noscript>
+<!-- /Top.Mail.Ru counter -->
 <meta name="yandex-partner-verification" content="74x79zu1vtv0x9ei">
 <meta name="partner-verification" content="w5w35j17orkmam7e">
 <meta name="takprodam-verification" content="25e14b3d-e28b-4265-8c77-11fb23182adf">
@@ -12,17 +26,11 @@
   // а при замедлении Telegram в России мог бы «повесить» загрузку страницы.
   window.IN_TG = /tgWebApp/.test(location.hash) || !!window.TelegramWebviewProxy || (window.parent !== window);
   if (window.IN_TG) document.write('<script src="https://telegram.org/js/telegram-web-app.js"><\/script>');
-  // Пиксель VK Рекламы (Top.Mail.Ru): впишите номер пикселя из кабинета VK Рекламы
-  // основной пиксель — idealgo.ru (3816480); старый (3814633) оставлен, чтобы не терять статистику
+  // Пиксель VK Рекламы: основной 3816480 стоит выше в исходном виде; старый 3814633 получает те же события
   window.VK_PIXEL_IDS = ["3816480", "3814633"];
   window.VK_PIXEL_ID = window.VK_PIXEL_IDS[0];
+  window._tmr.push({ id: "3814633", type: "pageView", start: (new Date()).getTime() });
   window.goal = function (name) { try { var q = (window._tmr = window._tmr || []); window.VK_PIXEL_IDS.forEach(function (id) { q.push({ type: "reachGoal", id: id, goal: name }); }); } catch (e) {} };
-  if (window.VK_PIXEL_IDS.length && !window.IN_TG) {
-    var _tmr = window._tmr || (window._tmr = []);
-    window.VK_PIXEL_IDS.forEach(function (id) { _tmr.push({ id: id, type: "pageView", start: (new Date()).getTime() }); });
-    (function (d, id) { if (d.getElementById(id)) return; var ts = d.createElement("script"); ts.async = true; ts.id = id;
-      ts.src = "https://top-fwz1.mail.ru/js/code.js"; var s = d.getElementsByTagName("script")[0]; s.parentNode.insertBefore(ts, s); })(document, "tmr-code");
-  }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -336,7 +344,7 @@
 </head>
 <body>
 <div id="partner-verification" style="display:none">74x79zu1vtv0x9ei w5w35j17orkmam7e</div>
-<noscript><div><img src="https://top-fwz1.mail.ru/counter?id=3816480;js=na" style="position:absolute;left:-9999px;" alt="Top.Mail.Ru" /><img src="https://top-fwz1.mail.ru/counter?id=3814633;js=na" style="position:absolute;left:-9999px;" alt="" /></div></noscript>
+<noscript><div><img src="https://top-fwz1.mail.ru/counter?id=3814633;js=na" style="position:absolute;left:-9999px;" alt="" /></div></noscript>
 <canvas id="snow"></canvas>
 
 <div class="app">
@@ -526,9 +534,9 @@
   <!-- ЧУЖОЙ ВИШЛИСТ -->
   <section class="screen" id="s-shared">
     <div class="wish-hero">
-      <div class="eyebrow">🎄 Вишлист</div>
+      <div class="eyebrow" id="shared-eyebrow">🎄 Вишлист</div>
       <h2 id="shared-title"></h2>
-      <p>Вот что хотелось бы получить на Новый год. Выберите подарок и сохраните его в свою подборку 🔖</p>
+      <p id="shared-text">Вот что хотелось бы получить на Новый год. Выберите подарок и сохраните его в свою подборку 🔖</p>
     </div>
     <div id="shared-items"></div>
     <div class="actions">
@@ -1105,6 +1113,12 @@ const CHANNEL_LINK = "https://t.me/podarochek_idei";
 
   // ——— Чужой вишлист по ссылке ———
   function showShared(w) {
+    if (w.name && w.name.startsWith("📌")) {   // подборка из нашего канала
+      $("shared-eyebrow").textContent = "🎁 Подборка из канала «Подарочек»";
+      $("shared-title").textContent = w.name.slice(2).trim();
+      $("shared-text").textContent = "Нажмите «Посмотреть», чтобы открыть подарок в магазине, или сохраните его в свою подборку 🔖";
+      try { window.goal && window.goal("channel_pick"); } catch (e) {}
+    } else
     $("shared-title").textContent = w.name ? "Вишлист: " + w.name : "Вишлист друга";
     const box = $("shared-items"); box.innerHTML = "";
     w.ids.map(byId).filter(Boolean).forEach((g, i) => box.appendChild(giftCard(g, i)));
